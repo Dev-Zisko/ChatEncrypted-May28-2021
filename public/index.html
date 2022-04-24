@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Encrypted Chat By Zisko</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/style.css">
+    </head>
+    <body>
+        <div id="chat"></div>
+            <form autocomplete="off">
+                <div id="controls">
+                    <input type="text" id="username" placeholder="Usuario" />
+                    <input type="text" id="content" placeholder="Mensaje" />
+                    <input type="submit" value="Enviar" />
+                </div>
+            </form>
+            <br>
+            <h3 id="h3save">Seguridad de tu encriptación:</h3>
+            <input type="number" id="numbersecret" placeholder="Número secreto" />
+            <input type="text" id="passphrase" placeholder="Frase secreta" />
+            <input type="submit" id="buttonsave" value="Guardar" onClick="saveEncry()" />
+        </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io();
+        var numbersecret = 0;
+        var passphrase = "Test";
+        var message = "";
+        var encrypted = ""; 
+        var decrypted = "";
+        var passphraseReal = "";
+
+        function textToCode (char) {
+            if(char == "a")
+                return "001"
+            else if(char == "b")
+                return "002"
+            else if(char == "c")
+                return "003"
+            else if(char == "d")
+                return "004"
+            else if(char == "e")
+                return "005"
+            else if(char == "f")
+                return "006"
+            else if(char == "g")
+                return "007"
+            else if(char == "h")
+                return "008"
+            else if(char == "i")
+                return "009"
+            else if(char == "j")
+                return "010"
+            else if(char == "k")
+                return "011"
+            else if(char == "l")
+                return "012"
+            else if(char == "m")
+                return "013"
+            else if(char == "n")
+                return "014"
+            else if(char == "ñ")
+                return "015"
+            else if(char == "o")
+                return "016"
+            else if(char == "p")
+                return "017"
+            else if(char == "q")
+                return "018"
+            else if(char == "r")
+                return "019"
+            else if(char == "s")
+                return "020"
+            else if(char == "t")
+                return "021"
+            else if(char == "u")
+                return "022"
+            else if(char == "v")
+                return "023"
+            else if(char == "w")
+                return "024"
+            else if(char == "x")
+                return "025"
+            else if(char == "y")
+                return "026"
+            else if(char == "z")
+                return "027"
+            else if(char == " ")
+                return "028"
+        }
+
+        function convertTextToCode (text) {
+            let i = 0;
+            let convert = [];
+            while (i < text.length) {
+                convert.push(textToCode(text[i]));
+                i += 1;
+            }
+            return convert;
+        }
+
+        function sumEncry (text) {
+            let convert = 0;
+            if (text == "001")
+                convert = 1 + numbersecret
+            else if(text == "002")
+                convert = 2 + numbersecret;
+            else if(text == "003")
+                convert = 3 + numbersecret;
+            else if(text == "004")
+                convert = 4 + numbersecret;
+            else if(text == "005")
+                convert = 5 + numbersecret;
+            else if(text == "006")
+                convert = 6 + numbersecret;
+            else if(text == "007")
+                convert = 7 + numbersecret;
+            else if(text == "008")
+                convert = 8 + numbersecret;
+            else if(text == "009")
+                convert = 9 + numbersecret;
+            else if(text == "010")
+                convert = 10 + numbersecret;
+            else if(text == "011")
+                convert = 11 + numbersecret;
+            else if(text == "012")
+                convert = 12 + numbersecret;
+            else if(text == "013")
+                convert = 13 + numbersecret;
+            else if(text == "014")
+                convert = 14 + numbersecret;
+            else if(text == "015")
+                convert = 15 + numbersecret;
+            else if(text == "016")
+                convert = 16 + numbersecret;
+            else if(text == "017")
+                convert = 17 + numbersecret;
+            else if(text == "018")
+                convert = 18 + numbersecret;
+            else if(text == "019")
+                convert = 19 + numbersecret;
+            else if(text == "020")
+                convert = 20 + numbersecret;
+            else if(text == "021")
+                convert = 21 + numbersecret;
+            else if(text == "022")
+                convert = 22 + numbersecret;
+            else if(text == "023")
+                convert = 23 + numbersecret;
+            else if(text == "024")
+                convert = 24 + numbersecret;
+            else if(text == "025")
+                convert = 25 + numbersecret;
+            else if(text == "026")
+                convert = 26 + numbersecret;
+            else if(text == "027")
+                convert = 27 + numbersecret;
+            else if(text == "028")
+                convert = 28 + numbersecret;
+            return convert;
+        }
+
+        function codeToEncry (passphrase, message) {
+            let psp = sumEncry(passphrase);
+            let msg = sumEncry(message);
+            let convert = psp + msg;
+            let finalConvert = "";
+            if(convert < 10)
+                finalConvert = "00" + convert.toString();
+            else
+                finalConvert = "0" + convert.toString();
+            return finalConvert;
+        }
+
+        function convertCodeToEncry (passphrase, message) {
+            let i = 0;
+            let j = 0;
+            let convert = [];
+            while (i < message.length) {
+                if (j < passphrase.length) {
+                    convert.push(codeToEncry(passphrase[j], message[i]));
+                    j += 1;
+                }
+                if (j == passphrase.length)
+                    j = 0;
+                i += 1;
+            }
+            return convert;
+        }    
+
+        function chooseRandom (passphrase) {
+            let arrayLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 
+                                'ñ', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+            let randomSelect = textToCode(arrayLetters[Math.floor(Math.random() * arrayLetters.length)]);
+            let passphraseSelect = passphrase[Math.floor(Math.random() * passphrase.length)];
+            let rd = sumEncry(randomSelect);
+            let psp = sumEncry(passphraseSelect);
+            let convert = rd + psp;
+            let finalConvert = "";
+            if (convert < 10)
+                finalConvert = "00" + convert.toString();
+            else
+                finalConvert = "0" + convert.toString();
+            return finalConvert;
+        }
+
+        function encryMethod (passphrase, message) {
+            let msg = [];
+            let maxMessage = message.length;
+            let count = 0;
+            let validation = true;
+            let i = 0;
+            while (validation) {
+                i = 0;
+                while (i < parseInt(numbersecret)) {
+                    msg.push(chooseRandom(passphrase));
+                    msg.push(chooseRandom(passphrase));
+                    i += 1;
+                } 
+                i = 0
+                while (i < parseInt(numbersecret)) {
+                    msg.push(message[0]);
+                    element = message[0];
+                    message.shift();
+                    message.push(element);
+                    i += 1;
+                    count += 1;
+                    if (count == maxMessage) {
+                        validation = false;
+                        break;
+                    }
+                }
+            }
+            i = 0;
+            while (i < parseInt(numbersecret)) {
+                msg.push(chooseRandom(passphrase));
+                msg.push(chooseRandom(passphrase));
+                i += 1;
+            }
+            return msg;
+        }
+
+        function convertMessageToArray (message, numbersecret) {
+            let i = 0;
+            let count = 0;
+            let convert = [];
+            let cut = "";
+            while (i < message.length) {
+                if (count < 3) {
+                    cut = cut + message[i];
+                    count += 1;
+                }
+                if (count == 3) {
+                    convert.push(cut);
+                    cut = "";
+                    count = 0;
+                }
+                i += 1
+            }
+            let ns = parseInt(numbersecret) * 2;
+            i = ns;
+            let state = true;
+            let msg = [];
+            count = 0;
+            while (i < convert.length) {
+                if (state) {
+                    msg.push(convert[i]);
+                    count += 1;
+                    if (count == parseInt(numbersecret)) {
+                        state = false;
+                        count = 0;
+                    }  
+                }
+                else {
+                   count += 1;
+                    if (count == ns) {
+                        state = true;
+                        count = 0;
+                    }
+                }
+                i += 1;
+            }
+            return msg;
+        }
+
+        function codeToText (char) {
+            if(char == "001")
+                return "a"
+            else if(char == "002")
+                return "b"
+            else if(char == "003")
+                return "c"
+            else if(char == "004")
+                return "d"
+            else if(char == "005")
+                return "e"
+            else if(char == "006")
+                return "f"
+            else if(char == "007")
+                return "g"
+            else if(char == "008")
+                return "h"
+            else if(char == "009")
+                return "i"
+            else if(char == "010")
+                return "j"
+            else if(char == "011")
+                return "k"
+            else if(char == "012")
+                return "l"
+            else if(char == "013")
+                return "m"
+            else if(char == "014")
+                return "n"
+            else if(char == "015")
+                return "ñ"
+            else if(char == "016")
+                return "o"
+            else if(char == "017")
+                return "p"
+            else if(char == "018")
+                return "q"
+            else if(char == "019")
+                return "r"
+            else if(char == "020")
+                return "s"
+            else if(char == "021")
+                return "t"
+            else if(char == "022")
+                return "u"
+            else if(char == "023")
+                return "v"
+            else if(char == "024")
+                return "w"
+            else if(char == "025")
+                return "x"
+            else if(char == "026")
+                return "y"
+            else if(char == "027")
+                return "z"
+            else if(char == "028")
+                return " "
+        }
+
+        function dencryMethod (passphrase, message, numbersecret) {
+            let i = 0;
+            let j = 0;
+            let msg = [];
+            let psp = [];
+            let convert = [];
+            let finalConvert = []
+            let number = "";
+            let msgDecry = "";
+            while (i < message.length) {
+                number = "";
+                if (message[i][0] == "0")
+                    console.log("");
+                else
+                    number = number + message[i][0];
+                if (message[i][1] == "0")
+                    number = number + message[i][2];
+                else
+                    number = number + message[i][1] + message[i][2];
+                msg.push(number);
+                i += 1;
+            }
+            i = 0
+            while (i < passphrase.length) {
+                number = "";
+                if (passphrase[i][0] == "0")
+                    console.log("");
+                else
+                    number = number + passphrase[i][0];
+                if (passphrase[i][1] == "0")
+                    number = number + passphrase[i][2];
+                else
+                    number = number + passphrase[i][1] + passphrase[i][2];
+                psp.push(number);
+                i += 1;
+            }
+            i = 0;
+            j = 0;
+            while (i < msg.length) {
+                if (j < psp.length) {
+                    convert.push(parseInt(msg[i]) - parseInt(psp[j]) - parseInt(numbersecret) - parseInt(numbersecret));
+                    j += 1;
+                } 
+                if (j == psp.length)
+                    j = 0;
+                i += 1;
+            } 
+            i = 0;
+            while (i < convert.length) {
+                if (parseInt(convert[i]) < 10)
+                    finalConvert.push("00" + convert[i].toString());
+                else
+                    finalConvert.push("0" + convert[i].toString());
+                i += 1;
+            }
+            i = 0;
+            while (i < finalConvert.length) {
+                msgDecry = msgDecry + (codeToText(finalConvert[i])).toString();
+                i += 1;
+            }
+            return msgDecry;
+        }
+
+        function saveEncry () {
+            let ns = $("#numbersecret").val();
+            let pp = $("#passphrase").val().trim();
+            numbersecret = parseInt(ns);
+            passphrase = convertTextToCode(pp.toLowerCase());
+            inputNs = document.getElementById("numbersecret");
+            inputPp = document.getElementById("passphrase");
+            buttonSave = document.getElementById("buttonsave");
+            h3Save = document.getElementById("h3save");
+            h3Save.hidden = true;
+            inputNs.hidden = true;
+            inputPp.hidden = true;
+            buttonSave.hidden = true;
+        }
+
+        // Cuando jQuery se haya cargado
+        $(function () {  
+            // Capturamos la señal de bienvenida y saludamos al usuario
+            socket.on("Bienvenida", function() {
+            $("#chat")
+                .empty()
+                .append("<h3>Bienvenido al chat público encriptado</h3>")
+            })
+        })
+
+        // Capturamos el clic en el botón de enviar
+        var form = $("form").on("submit", function (e) {
+            // Desactivamos el formulario para enviarlo con JS
+            e.preventDefault()
+
+            let msg = $("#content").val().trim();
+            let messageCode = convertTextToCode(msg.toLowerCase());
+            console.log(messageCode);
+            let messageEncry = convertCodeToEncry(passphrase, messageCode);
+            console.log(messageEncry);
+            let messageFinal = encryMethod(passphrase, messageEncry);
+            console.log(messageFinal);
+            let messageEnd = messageFinal.toString().replace(/,/g, "");
+            console.log(messageEnd);
+            let messageSend = CryptoJS.AES.encrypt(messageEnd, passphrase.toString());
+
+            // Creamos un objeto con el mensaje
+            var message = {
+                name: $("#username").val().trim(), 
+                content: messageSend.toString()
+            }
+
+            // Lo emitimos al servidor si cumple las condiciones
+            if (message.name.length > 0 && message.content.length > 0) {
+                socket.emit("nuevo_mensaje", message)  // Lo emitimos
+                $("#username").attr("disabled","disabled") // Desactivamos el nombre
+                $("#content").val("").focus()  // Borramos el mensaje y lo seleccionamos
+            }
+        })
+
+        // Recuperamos el mensaje y lo añadimos al HTML
+        socket.on('difundir_mensaje', function (message) {
+            decrypted = CryptoJS.AES.decrypt(message.content, passphrase.toString());
+            messageSecret = decrypted.toString(CryptoJS.enc.Utf8);
+            messageArray = convertMessageToArray(messageSecret, numbersecret);
+            messageFinal = dencryMethod(passphrase, messageArray, numbersecret);
+            $("#chat")
+                .append(`
+                <b>${special(message.name)}</b>
+                ${special(messageFinal)}<br>`)
+        })
+
+        // Función para prevenir inyección de tags
+        function special (str) { 
+            // gi => Reemplazo global case-insensitive
+            str = str.replace(/</gi, '&lt;') // importante usar comillas simples
+            str = str.replace(/>/gi, '&gt;') // en las expresiones regulares
+            return str
+        }
+    </script> 
+  </body>
+</html>
